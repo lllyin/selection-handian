@@ -1,0 +1,34 @@
+{
+  "name": "selection-handian",
+  "version": "1.0.0",
+  "description": "划词,查汉典",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "cross-env NODE_ENV=development node scripts/index.js",
+    "build": "cross-env NODE_ENV=production node scripts/index.js",
+    "size": "size-limit && gzip-size index.min.js"
+  },
+  "keywords": [
+    "划词",
+    "汉典"
+  ],
+  "author": "lyin",
+  "license": "MIT",
+  "devDependencies": {
+    "@babel/cli": "^7.15.7",
+    "@babel/core": "^7.15.8",
+    "@babel/polyfill": "^7.12.1",
+    "@babel/preset-env": "^7.15.8",
+    "babel-core": "^6.26.3",
+    "babel-jest": "^27.3.1",
+    "cross-env": "^7.0.3",
+    "gzip-size-cli": "^5.0.0",
+    "jest": "^27.3.1",
+    "regenerator-runtime": "^0.13.9",
+    "rollup": "^2.58.0",
+    "rollup-plugin-babel": "^4.4.0",
+    "rollup-plugin-uglify": "^6.0.4",
+    "size-limit": "^6.0.3"
+  }
+}
