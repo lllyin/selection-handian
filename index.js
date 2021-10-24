@@ -80,6 +80,8 @@ class SelectionHanDian {
     div.style.zIndex = '1200'
     div.style.textAlign = 'center'
     div.style.lineHeight = '32px'
+    div.style.fontSize = '16px'
+    div.style.userSelect = "none"
     div.innerText = '典'
     div.title = '查汉典'
 
@@ -87,6 +89,7 @@ class SelectionHanDian {
     div.style.top = `${top + this.options.offsetY}px`
 
     div.addEventListener('mousedown', (e) => e.stopPropagation())
+    div.addEventListener('mouseup', (e) => e.stopPropagation())
     div.addEventListener('click', (e) => {
       e.stopPropagation()
       this.hideButton()
