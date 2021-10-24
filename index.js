@@ -159,7 +159,8 @@ class SelectionHanDian {
     const content = document.createElement('iframe')
     content.frameBorder = '0'
     content.src = `https://www.zdic.net/hans/${word}`
-    content.sandbox = 'allow-same-origin allow-scripts allow-popups allow-forms'
+    content.sandbox = 'allow-same-origin allow-scripts allow-forms'
+    content.seamless = "seamless"
     content.id = 'handian_content'
     // content.style['display'] = 'none';
     content.width = '375'
