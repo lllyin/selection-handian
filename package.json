@@ -1,6 +1,6 @@
 {
   "name": "selection-handian",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "划词,查汉典",
   "main": "index.js",
   "scripts": {
@@ -30,5 +30,13 @@
     "rollup-plugin-babel": "^4.4.0",
     "rollup-plugin-uglify": "^6.0.4",
     "size-limit": "^6.0.3"
-  }
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Andesome/selection-handian.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Andesome/selection-handian/issues"
+  },
+  "homepage": "https://github.com/Andesome/selection-handian#readme"
 }

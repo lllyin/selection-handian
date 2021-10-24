@@ -15,7 +15,7 @@ const defaultOptions = {
   offsetY: 12,
 }
 
-class SelectionPop {
+class SelectionHanDian {
   constructor(options = {}) {
     this.options = {
       ...defaultOptions,
@@ -283,7 +283,7 @@ class SelectionPop {
   }
 }
 
-new SelectionPop({
+new SelectionHanDian({
   onEnd: function (event, text, self) {
     Array.isArray(dataLayer) &&
       dataLayer.push(
@@ -291,3 +291,5 @@ new SelectionPop({
       )
   },
 })
+
+export default SelectionHanDian
