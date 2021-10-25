@@ -16,7 +16,7 @@
 
 ### 1. ES6 Module
 ```js
-import SelectionHandian form 'selection-handian'
+import SelectionHandian from 'selection-handian'
 
 new SelectionHandian({
   /**
@@ -61,6 +61,8 @@ const defaultOptions = {
   container: document.body,
   // 监听节点
   el: document.body,
+  // 滚动容器，默认为 document.documentElement || document.body
+  scroller: void 0,
   // 浮窗
   popup: null,
   // 选择结束

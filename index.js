@@ -1,18 +1,20 @@
 const defaultOptions = {
   // 汉典最大加载时间
   MAX_TIME_OUT: 3500,
+  // 滚动容器，默认为 document.documentElement || document.body
+  scroller: void 0,
   // 浮窗挂载节点
   container: document.body,
   // 监听节点
   el: document.body,
   // 浮窗
   popup: null,
-  // 选择结束
-  onEnd: () => {},
   // x轴位移量
   offsetX: 2,
   // y轴位移量
   offsetY: 12,
+  // 选择结束
+  onEnd: () => {},
 }
 
 class SelectionHanDian {
@@ -81,7 +83,7 @@ class SelectionHanDian {
     div.style.textAlign = 'center'
     div.style.lineHeight = '32px'
     div.style.fontSize = '16px'
-    div.style.userSelect = "none"
+    div.style.userSelect = 'none'
     div.innerText = '典'
     div.title = '查汉典'
 
@@ -163,7 +165,7 @@ class SelectionHanDian {
     content.frameBorder = '0'
     content.src = `https://www.zdic.net/hans/${word}`
     content.sandbox = 'allow-same-origin allow-scripts allow-forms'
-    content.seamless = "seamless"
+    content.seamless = 'seamless'
     content.id = 'handian_content'
     // content.style['display'] = 'none';
     content.width = '375'
@@ -198,6 +200,23 @@ class SelectionHanDian {
     return cnReg.test(text2) ? text2 : ''
   }
 
+  // 插入样式
+  injectStyles = (styles) => {
+    const style = document.createElement('style')
+
+    style.type = 'text/css'
+    style.innerHTML = `
+      .ly-selection-popup-button {
+        opacity: 0.6;
+      }
+      .ly-selection-popup-button:hover {
+        opacity: 1;
+      }
+    `
+    document.head.appendChild(style)
+    return style
+  }
+
   // 计算元素位置
   calcPosition(position, el) {
     if (!position || !el) return
@@ -219,6 +238,26 @@ class SelectionHanDian {
     el.style.transition = 'all 0.25s cubic-bezier(0, 0, 0.2, 1) 0s'
     el.style.left = `${position.left}px`
     el.style.top = `${position.top}px`
+
+    // 修复一下弹窗的完整可见性
+    const elBottom = position.top + el.clientHeight
+    const scrollTop = this.options.scroller
+      ? this.options.scroller.scrollTop
+      : Math.max(document.documentElement.scrollTop, document.body.scrollTop)
+    const viewBottom = window.innerHeight + scrollTop
+    const diffDistance = Math.max(0, elBottom - viewBottom)
+    if (diffDistance > 0) {
+      const scrollOpts = {
+        top: scrollTop + diffDistance,
+        behavior: 'smooth',
+      }
+      if (this.options.scroller) {
+        this.options.scroller.scrollTo(scrollOpts)
+      } else {
+        document.documentElement.scrollTo(scrollOpts)
+        document.body.scrollTo(scrollOpts)
+      }
+    }
   }
 
   // 获取popup node
