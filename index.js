@@ -24,6 +24,7 @@ class SelectionHanDian {
       ...options,
     }
     this._init()
+    this.injectStyles()
     this._createPopup()
   }
 
@@ -134,12 +135,19 @@ class SelectionHanDian {
     div.style.overflow = 'hidden'
 
     const loading = document.createElement('p')
+    loading.style.position = 'absolute'
+    loading.style.left = '50%'
+    loading.style.top = '0'
+    loading.style.transform = 'translateX(-50%)'
+    loading.style.zIndex = '99'
     loading.style.textAlign = 'center'
     loading.style.fontSize = '12px'
+    loading.style.width = '100%'
     loading.style.height = '20px'
     loading.style.lineHeight = '20px'
+    loading.style.backgroundColor = 'rgba(0, 0, 0, 0.36)'
+    loading.style.color = '#f5f5f5'
     loading.style.margin = '0'
-    loading.style.color = '#888'
     loading.style.overflow = 'hidden'
 
     loading.innerHTML = '加載結果中，請稍候……'
@@ -164,7 +172,7 @@ class SelectionHanDian {
     const content = document.createElement('iframe')
     content.frameBorder = '0'
     content.src = `https://www.zdic.net/hans/${word}`
-    content.sandbox = 'allow-same-origin allow-scripts allow-forms'
+    content.sandbox = 'allow-same-origin allow-forms'
     content.seamless = 'seamless'
     content.id = 'handian_content'
     // content.style['display'] = 'none';
@@ -206,11 +214,12 @@ class SelectionHanDian {
 
     style.type = 'text/css'
     style.innerHTML = `
-      .ly-selection-popup-button {
-        opacity: 0.6;
+      .ly-selection-popup-cotainer .handian-loading {
+          top: 0 !important;
+          transition: top 0.25s cubic-bezier(0, 0, 0.2, 1) 0s;
       }
-      .ly-selection-popup-button:hover {
-        opacity: 1;
+      .ly-selection-popup-cotainer .handian-loading.hide {
+        top: -25px !important;
       }
     `
     document.head.appendChild(style)
@@ -309,14 +318,16 @@ class SelectionHanDian {
   showLoading() {
     const loading = document.getElementById('handian-loading')
     if (loading) {
-      loading.style.height = '20px'
+      loading.classList.remove('hide')
+      // loading.style.height = '20px'
     }
   }
   // 隐藏loading
   hideLoading() {
     const loading = document.getElementById('handian-loading')
     if (loading) {
-      loading.style.height = '0'
+      loading.classList.add('handian-loading', 'hide')
+      // loading.style.height = '0'
     }
   }
 
@@ -328,8 +339,8 @@ class SelectionHanDian {
 
 new SelectionHanDian({
   onEnd: function (event, text, self) {
-    Array.isArray(dataLayer) &&
-      dataLayer.push(
+    Array.isArray(window.dataLayer) &&
+      window.dataLayer.push(
         Object.assign({ event: 'dianClick', selection_text: text }),
       )
   },
