@@ -23,7 +23,7 @@ new SelectionHandian({
    * 查词结束时触发
    * @param {MouseEvent} event 鼠标事件
    * @param {String} text 查词词条
-   * @param {Object} self new SelectionHandian的实例
+   * @param {Object} instance new SelectionHandian的实例
    */
   onEnd(event, text, instance) {
     // your logic
