@@ -65,11 +65,11 @@ const defaultOptions = {
   scroller: void 0,
   // 浮窗
   popup: null,
-  // 选择结束
-  onEnd: () => {},
   // x轴位移量
   offsetX: 2,
   // y轴位移量
   offsetY: 12,
+  // 选择结束
+  onEnd: () => {},
 }
 ```
