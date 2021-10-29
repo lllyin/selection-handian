@@ -53,12 +53,7 @@ class SelectionHanDian {
 
   // 创建按钮
   _createButton(event, trimText) {
-    const preBtn = document.querySelector('.ly-selection-popup-button')
-
-    if (preBtn) {
-      document.body.removeChild(preBtn)
-    }
-
+    let button = document.querySelector('.ly-selection-popup-button')
     const sh =
       window.pageYOffset ||
       document.documentElement.scrollTop ||
@@ -66,34 +61,40 @@ class SelectionHanDian {
       0
     const left = event.clientX
     const top = event.clientY + sh
-    const div = document.createElement('div')
-    div.setAttribute('class', 'ly-selection-popup-button')
 
-    div.style.position = 'absolute'
-    div.style.display = 'block'
-    div.style.left = 0
-    div.style.top = 0
-    div.style.width = '32px'
-    div.style.minHeight = '32px'
-    div.style.borderRadius = '3px'
-    div.style.backgroundColor = '#f5f5f5'
-    div.style.fontWeigh = 500
-    div.style.color = '#9d6a51'
-    div.style.cursor = 'pointer'
-    div.style.zIndex = '1200'
-    div.style.textAlign = 'center'
-    div.style.lineHeight = '32px'
-    div.style.fontSize = '16px'
-    div.style.userSelect = 'none'
-    div.innerText = '典'
-    div.title = '查汉典'
+    if (!button) {
+      button = document.createElement('div')
+      button.setAttribute('class', 'ly-selection-popup-button')
 
-    div.style.left = `${left}px`
-    div.style.top = `${top + this.options.offsetY}px`
+      button.style.position = 'absolute'
+      button.style.display = 'block'
+      button.style.left = 0
+      button.style.top = 0
+      button.style.width = '32px'
+      button.style.minHeight = '32px'
+      button.style.borderRadius = '3px'
+      button.style.backgroundColor = '#f5f5f5'
+      button.style.fontWeigh = 500
+      button.style.color = '#9d6a51'
+      button.style.cursor = 'pointer'
+      button.style.zIndex = '1200'
+      button.style.textAlign = 'center'
+      button.style.lineHeight = '32px'
+      button.style.fontSize = '16px'
+      button.style.userSelect = 'none'
+      button.innerText = '典'
+      button.title = '查汉典'
 
-    div.addEventListener('mousedown', (e) => e.stopPropagation())
-    div.addEventListener('mouseup', (e) => e.stopPropagation())
-    div.addEventListener('click', (e) => {
+      button.addEventListener('mousedown', (e) => e.stopPropagation())
+      button.addEventListener('mouseup', (e) => e.stopPropagation())
+
+      document.body.appendChild(button)
+      this.button = button
+    }
+
+    this.showButton()
+
+    button.onclick = (e) => {
       e.stopPropagation()
       this.hideButton()
       // 汉典
@@ -109,12 +110,13 @@ class SelectionHanDian {
         this.popup,
       )
       this.callPosition(this.popup, newPosition)
-    })
+    }
 
-    document.body.appendChild(div)
-    this.button = div
+    button.style.transform = `translate(${left}px, ${
+      top + this.options.offsetY
+    }px)`
 
-    return div
+    return button
   }
 
   // 创建浮窗
@@ -214,6 +216,9 @@ class SelectionHanDian {
 
     style.type = 'text/css'
     style.innerHTML = `
+      .ly-selection-popup-button {
+        transition: transform 350ms cubic-bezier(0.4, 0, 0.2, 1) 0ms, opacity 500ms cubic-bezier(0.4, 0, 0.2, 1) 0ms;
+      }
       .ly-selection-popup-cotainer .handian-loading {
           top: 0 !important;
           transition: top 0.25s cubic-bezier(0, 0, 0.2, 1) 0s;
@@ -289,14 +294,16 @@ class SelectionHanDian {
   // 展示Button
   showButton = () => {
     if (this.button) {
-      this.button.style.display = 'block'
+      this.button.style.opacity = 1
+      this.button.style.pointerEvents = 'auto'
     }
   }
 
   // 隐藏button
   hideButton = () => {
     if (this.button) {
-      this.button.style.display = 'none'
+      this.button.style.opacity = 0
+      this.button.style.pointerEvents = 'none'
     }
   }
 
