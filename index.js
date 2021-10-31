@@ -217,6 +217,7 @@ class SelectionHanDian {
     style.type = 'text/css'
     style.innerHTML = `
       .ly-selection-popup-button {
+        will-change: transform, opacity;
         transition: transform 350ms cubic-bezier(0.4, 0, 0.2, 1) 0ms, opacity 500ms cubic-bezier(0.4, 0, 0.2, 1) 0ms;
       }
       .ly-selection-popup-cotainer .handian-loading {

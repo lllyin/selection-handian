@@ -17,10 +17,9 @@ module.exports = config => {
     output: {
       file: fileName,
       format: 'umd',
-      name: name || 'momentAgo',
+      name: name || 'SelectionHandian',
       globals: {
-        momentAgo: 'momentAgo',
-        dayjs: 'dayjs'
+        SelectionHandian: 'SelectionHandian',
       }
     },
     plugins: [
