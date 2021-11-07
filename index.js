@@ -54,16 +54,22 @@ class SelectionHanDian {
 
   // 汉典加速
   _prefetchHanDian() {
-    const img = new Image()
-    img.src = '//www.zdic.net/images/iLogo.png'
+    setTimeout(() => {
+      const iframe = document.createElement('iframe')
+      iframe.src = '//www.zdic.net'
 
-    img.width = 0
-    img.height = 0
-    img.style.width = '0px'
-    img.style.height = '0px'
-    img.style.overflow = 'hidden'
+      iframe.width = 0
+      iframe.height = 0
+      iframe.style.width = '0px'
+      iframe.style.height = '0px'
+      iframe.style.overflow = 'hidden'
+      iframe.style.opacity = '0'
+      iframe.frameBorder = '0'
+      iframe.sandbox = 'allow-same-origin allow-forms'
+      iframe.seamless = 'seamless'
 
-    document.body.appendChild(img)
+      document.body.appendChild(iframe)
+    }, 1000)
   }
 
   // 创建按钮
