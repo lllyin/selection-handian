@@ -24,6 +24,7 @@ class SelectionHanDian {
       ...options,
     }
     this._init()
+    this._prefetchHanDian()
     this.injectStyles()
     this._createPopup()
   }
@@ -49,6 +50,20 @@ class SelectionHanDian {
         window.addEventListener('mousedown', this.hideAll)
       }
     })
+  }
+
+  // 汉典加速
+  _prefetchHanDian() {
+    const img = new Image()
+    img.src = '//www.zdic.net/images/iLogo.png'
+
+    img.width = 0
+    img.height = 0
+    img.style.width = '0px'
+    img.style.height = '0px'
+    img.style.overflow = 'hidden'
+
+    document.body.appendChild(img)
   }
 
   // 创建按钮
