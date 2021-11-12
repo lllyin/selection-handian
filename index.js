@@ -476,10 +476,10 @@ class SelectionHanDian {
 }
 
 new SelectionHanDian({
-  onEnd: function (event, text, self) {
+  onEnd: function (event, text, instance) {
     Array.isArray(window.dataLayer) &&
       window.dataLayer.push(
-        Object.assign({ event: 'dianClick', selection_text: text }),
+        Object.assign({ event: 'dianClick', selection_text: text, platform: instance.platform }),
       )
   },
 })
