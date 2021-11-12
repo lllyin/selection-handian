@@ -243,12 +243,12 @@ class SelectionHanDian {
     loading.style.justifyContent = 'center'
     loading.style.alignItems = 'center'
     loading.style.width = '100%'
-    loading.style.height = '100%'
+    loading.style.height = this.isMobile ? '100%' : '20px'
     loading.style.zIndex = '99'
     loading.style.textAlign = 'center'
     loading.style.fontSize = '12px'
     loading.style.backgroundColor = 'rgba(248, 249, 251, 0.8)'
-    loading.style.color = '#888'
+    loading.style.color = '#555'
     loading.style.margin = '0'
     loading.style.overflow = 'hidden'
     loading.setAttribute('class', 'handian-loading hide')
@@ -324,11 +324,18 @@ class SelectionHanDian {
         transition: transform 350ms cubic-bezier(0.4, 0, 0.2, 1) 0ms, opacity 500ms cubic-bezier(0.4, 0, 0.2, 1) 0ms;
       }
       .ly-selection-popup-cotainer .handian-loading {
-          transition: opacity 0.25s cubic-bezier(0, 0, 0.2, 1) 0s;
+        opacity: 1;
+        will-change: transform, opacity;
       }
       .ly-selection-popup-cotainer .handian-loading.hide {
+          transition: opacity,transform  0.25s cubic-bezier(0, 0, 0.2, 1) 0s;
+      }
+      .ly-selection-popup-cotainer.mobile .handian-loading.hide {
           opacity: 0;
           visibility: hidden;
+      }
+      .ly-selection-popup-cotainer.pc .handian-loading.hide {
+        transform: translateY(-100%);
       }
     `
     document.head.appendChild(style)
