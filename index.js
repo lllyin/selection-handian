@@ -26,6 +26,9 @@ const EVENT_NAMES = {
     END: 'mouseup',
   },
 }
+// 关闭按钮
+const closeIcon =
+  '<?xml version="1.0" standalone="no"?><!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd"><svg t="1636784066087" class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="4964" xmlns:xlink="http://www.w3.org/1999/xlink" width="200" height="200"><defs><style type="text/css"></style></defs><path d="M512 0a512 512 0 0 0-512 512 512 512 0 0 0 512 512 512 512 0 0 0 512-512 512 512 0 0 0-512-512z" fill="#efd0c9" p-id="4965"></path><path d="M717.165714 306.176a35.986286 35.986286 0 0 0-50.834285 0.146286L512 461.019429 357.668571 306.322286a35.986286 35.986286 0 0 0-50.980571 50.761143L461.165714 512 306.688 666.916571a35.986286 35.986286 0 0 0 50.980571 50.761143L512 562.980571l154.331429 154.843429a35.693714 35.693714 0 0 0 50.834285 0.073143 35.986286 35.986286 0 0 0 0.146286-50.907429L562.834286 512l154.331428-154.916571a35.913143 35.913143 0 0 0 0-50.907429z" fill="#AE060F" p-id="4966"></path></svg>'
 
 class SelectionHanDian {
   constructor(options = {}) {
@@ -33,6 +36,7 @@ class SelectionHanDian {
       ...defaultOptions,
       ...options,
     }
+    this.stopPropagationNodes = []
     this._init()
   }
 
@@ -95,6 +99,20 @@ class SelectionHanDian {
         window.addEventListener(EVENT_NAMES[this.platform].START, this.hideAll)
       }
     })
+    this.stopPropagationNodes.forEach((node) => {
+      node.addEventListener(EVENT_NAMES[this.platform].START, (e) =>
+        e.stopPropagation(),
+      )
+      node.addEventListener(EVENT_NAMES[this.platform].END, (e) =>
+        e.stopPropagation(),
+      )
+    })
+    this.closeBtn?.addEventListener(EVENT_NAMES[this.platform].END, () => {
+      this.hidePopup()
+    })
+    this.bar?.addEventListener(EVENT_NAMES[this.platform].END, () => {
+      this.hidePopup()
+    })
   }
 
   // 汉典加速
@@ -119,7 +137,7 @@ class SelectionHanDian {
 
   // 创建按钮
   _createButton(event, trimText) {
-    let button = document.querySelector('.ly-selection-popup-button')
+    let button = document.querySelector('.ly-popup-button')
     const sh =
       window.pageYOffset ||
       document.documentElement.scrollTop ||
@@ -131,7 +149,7 @@ class SelectionHanDian {
 
     if (!button) {
       button = document.createElement('div')
-      button.setAttribute('class', 'ly-selection-popup-button')
+      button.setAttribute('class', 'ly-popup-button')
 
       button.style.position = 'absolute'
       button.style.display = 'block'
@@ -200,7 +218,7 @@ class SelectionHanDian {
   // 创建mask
   _createMask() {
     const div = document.createElement('div')
-    div.setAttribute('class', `ly-selection-popup-mask ${this.platform}`)
+    div.setAttribute('class', `ly-popup-mask ${this.platform}`)
 
     div.style.position = 'fixed'
     div.style.visibility = 'hidden'
@@ -221,7 +239,7 @@ class SelectionHanDian {
   // 创建浮窗
   _createPopup() {
     const div = document.createElement('div')
-    div.setAttribute('class', `ly-selection-popup-cotainer ${this.platform}`)
+    div.setAttribute('class', `ly-popup-cotainer ${this.platform}`)
 
     div.style.position = this.isMobile ? 'fixed' : 'absolute'
     div.style.display = 'none'
@@ -231,9 +249,16 @@ class SelectionHanDian {
     div.style.minWidth = this.isMobile ? '100vw' : '375px'
     div.style.minHeight = this.isMobile ? '60vh' : '375px'
     div.style.backgroundColor = '#fff'
-    div.style.borderRadius = '2px'
     div.style.boxShadow = 'rgb(0 0 0 / 8%) 1px 2px 13px 0px'
     div.style.overflow = this.isMobile ? 'auto' : 'hidden'
+
+    // 创建bar
+    const bar = document.createElement('div')
+    bar.setAttribute('class', 'ly-popup-bar')
+    // 创建关闭按钮
+    const closeBtn = document.createElement('div')
+    closeBtn.setAttribute('class', 'ly-popup-close')
+    closeBtn.innerHTML = closeIcon
 
     const loading = document.createElement('p')
     loading.style.position = 'absolute'
@@ -256,10 +281,16 @@ class SelectionHanDian {
     loading.innerHTML = '加載結果中，請稍候……'
     loading.id = 'handian-loading'
     div.appendChild(loading)
+    this.isMobile && div.appendChild(bar)
+    div.appendChild(closeBtn)
 
     document.body.appendChild(div)
     this.popup = div
+    this.loading = loading
+    this.bar = bar
+    this.closeBtn = closeBtn
 
+    this.stopPropagationNodes.push(bar, closeBtn)
     return div
   }
 
@@ -285,6 +316,10 @@ class SelectionHanDian {
     this.showLoading()
     content.addEventListener('load', () => {
       console.log('汉典加载好了', Date.now())
+      this.hideLoading()
+    })
+    content.addEventListener('error', () => {
+      console.log('加载汉典报错', Date.now())
       this.hideLoading()
     })
     if (this.options.MAX_TIME_OUT) {
@@ -319,22 +354,53 @@ class SelectionHanDian {
       body * {
         -webkit-touch-callout: none;
       }
-      .ly-selection-popup-button {
+      .ly-popup-button {
         will-change: transform, opacity;
         transition: transform 350ms cubic-bezier(0.4, 0, 0.2, 1) 0ms, opacity 500ms cubic-bezier(0.4, 0, 0.2, 1) 0ms;
       }
-      .ly-selection-popup-cotainer .handian-loading {
+      .ly-popup-cotainer.pc {
+        border-radius: 3px;
+      }
+      .ly-popup-cotainer.mobile {
+        border-top-left-radius: 12px;
+        border-top-right-radius: 12px;
+      }
+      .ly-popup-cotainer .ly-popup-bar {
+        position: absolute;
+        left: 50%;
+        top: 6px;
+        transform: translateX(-50%);
+        background-color: #BBBABE;
+        border-radius: 5px;
+        width: 36px;
+        height: 5px;
+        z-index: 1000;
+      }
+      .ly-popup-cotainer .ly-popup-close {
+        position: absolute;
+        right: 6px;
+        top: 7px;
+        width: 30px;
+        height: 30px;
+        z-index: 1001;
+        cursor: pointer;
+      }
+      .ly-popup-cotainer .ly-popup-close > svg {
+        width: 100%;
+        height: 100%;
+      }
+      .ly-popup-cotainer .handian-loading {
         opacity: 1;
         will-change: transform, opacity;
       }
-      .ly-selection-popup-cotainer .handian-loading.hide {
+      .ly-popup-cotainer .handian-loading.hide {
           transition: opacity,transform  0.25s cubic-bezier(0, 0, 0.2, 1) 0s;
       }
-      .ly-selection-popup-cotainer.mobile .handian-loading.hide {
+      .ly-popup-cotainer.mobile .handian-loading.hide {
           opacity: 0;
           visibility: hidden;
       }
-      .ly-selection-popup-cotainer.pc .handian-loading.hide {
+      .ly-popup-cotainer.pc .handian-loading.hide {
         transform: translateY(-100%);
       }
     `
@@ -447,6 +513,7 @@ class SelectionHanDian {
         this.popup.style.display = 'none'
       }
     }
+    // mask
     if (this.isMobile) {
       this.mask.style.opacity = 0
       this.mask.style.visibility = 'hidden'
@@ -479,7 +546,11 @@ new SelectionHanDian({
   onEnd: function (event, text, instance) {
     Array.isArray(window.dataLayer) &&
       window.dataLayer.push(
-        Object.assign({ event: 'dianClick', selection_text: text, platform: instance.platform }),
+        Object.assign({
+          event: 'dianClick',
+          selection_text: text,
+          platform: instance.platform,
+        }),
       )
   },
 })
