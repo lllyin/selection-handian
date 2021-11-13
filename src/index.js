@@ -1,3 +1,6 @@
+import bingTouch from './bingTouch'
+import styles from './styles'
+
 const defaultOptions = {
   // 汉典最大加载时间
   MAX_TIME_OUT: 5000,
@@ -110,9 +113,12 @@ class SelectionHanDian {
     this.closeBtn?.addEventListener(EVENT_NAMES[this.platform].END, () => {
       this.hidePopup()
     })
-    this.bar?.addEventListener(EVENT_NAMES[this.platform].END, () => {
-      this.hidePopup()
-    })
+
+    bingTouch(this.bar, this.popup, this.hidePopup)
+
+    // this.bar?.addEventListener(EVENT_NAMES[this.platform].END, () => {
+    //   this.hidePopup()
+    // })
   }
 
   // 汉典加速
@@ -159,13 +165,14 @@ class SelectionHanDian {
       button.style.minHeight = '32px'
       button.style.borderRadius = '3px'
       button.style.backgroundColor = '#f5f5f5'
-      button.style.fontWeigh = 500
+      button.style.fontFamily = 'STSong, STFangSong'
+      button.style.fontWeight = 500
       button.style.color = '#9d6a51'
       button.style.cursor = 'pointer'
       button.style.zIndex = '1200'
       button.style.textAlign = 'center'
       button.style.lineHeight = '32px'
-      button.style.fontSize = '16px'
+      button.style.fontSize = '18px'
       button.style.userSelect = 'none'
       button.innerText = '典'
       button.title = '查汉典'
@@ -346,64 +353,12 @@ class SelectionHanDian {
   }
 
   // 插入样式
-  injectStyles = (styles) => {
+  injectStyles = () => {
     const style = document.createElement('style')
 
     style.type = 'text/css'
-    style.innerHTML = `
-      body * {
-        -webkit-touch-callout: none;
-      }
-      .ly-popup-button {
-        will-change: transform, opacity;
-        transition: transform 350ms cubic-bezier(0.4, 0, 0.2, 1) 0ms, opacity 500ms cubic-bezier(0.4, 0, 0.2, 1) 0ms;
-      }
-      .ly-popup-cotainer.pc {
-        border-radius: 3px;
-      }
-      .ly-popup-cotainer.mobile {
-        border-top-left-radius: 12px;
-        border-top-right-radius: 12px;
-      }
-      .ly-popup-cotainer .ly-popup-bar {
-        position: absolute;
-        left: 50%;
-        top: 6px;
-        transform: translateX(-50%);
-        background-color: #BBBABE;
-        border-radius: 5px;
-        width: 36px;
-        height: 5px;
-        z-index: 1000;
-      }
-      .ly-popup-cotainer .ly-popup-close {
-        position: absolute;
-        right: 6px;
-        top: 7px;
-        width: 30px;
-        height: 30px;
-        z-index: 1001;
-        cursor: pointer;
-      }
-      .ly-popup-cotainer .ly-popup-close > svg {
-        width: 100%;
-        height: 100%;
-      }
-      .ly-popup-cotainer .handian-loading {
-        opacity: 1;
-        will-change: transform, opacity;
-      }
-      .ly-popup-cotainer .handian-loading.hide {
-          transition: opacity,transform  0.25s cubic-bezier(0, 0, 0.2, 1) 0s;
-      }
-      .ly-popup-cotainer.mobile .handian-loading.hide {
-          opacity: 0;
-          visibility: hidden;
-      }
-      .ly-popup-cotainer.pc .handian-loading.hide {
-        transform: translateY(-100%);
-      }
-    `
+    style.innerHTML = styles
+
     document.head.appendChild(style)
     return style
   }
@@ -500,6 +455,7 @@ class SelectionHanDian {
         this.mask.style.visibility = 'visible'
         this.mask.style.zIndex = 1200
       }
+      clearTimeout(this.popTimer)
     }
   }
 
@@ -509,6 +465,9 @@ class SelectionHanDian {
       this.options.container.style.overflow = 'auto'
       if (this.isMobile) {
         this.popup.style.transform = `translateY(100%)`
+        this.popTimer = setTimeout(() => {
+          this.popup.style.display = 'none'
+        }, 350)
       } else {
         this.popup.style.display = 'none'
       }

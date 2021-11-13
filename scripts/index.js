@@ -25,7 +25,7 @@ async function build(option) {
   try {
     build(
       configFactory({
-        input: './index.js',
+        input: './src/index.js',
         fileName: './index.min.js',
       }),
     )
