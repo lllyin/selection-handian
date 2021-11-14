@@ -292,6 +292,12 @@ class SelectionHanDian {
     content.width = this.isMobile ? window.innerWidth : '375'
     content.height = this.isMobile ? window.innerHeight * 0.6 : '400'
 
+    this.isMobile &&
+      tapStyles(content, {
+        width: '100%',
+        height: '60vh',
+      })
+
     console.log('加载汉典', Date.now())
     this.showLoading()
     content.addEventListener('load', () => {
@@ -423,7 +429,7 @@ class SelectionHanDian {
     if (this.popup) {
       tapStyles([document.documentElement, this.options.container], {
         overflow: 'hidden',
-        height: this.isMobile ? '100%' : '',
+        height: this.isMobile ? '100vh' : '',
         position: this.isMobile ? 'relative' : '',
       })
       this.popup.style.display = 'block'
