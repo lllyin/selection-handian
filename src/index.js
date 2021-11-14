@@ -1,77 +1,41 @@
+import {
+  EVENT_NAMES,
+  DEFAULT_OPTIONS,
+  CLOSE_ICON,
+  MOBILE,
+  TABLET,
+} from './constants'
 import bingTouch from './bingTouch'
 import styles from './styles'
-
-const defaultOptions = {
-  // 汉典最大加载时间
-  MAX_TIME_OUT: 5000,
-  // 滚动容器，默认为 document.documentElement || document.body
-  scroller: void 0,
-  // 浮窗挂载节点
-  container: document.body,
-  // 监听节点
-  el: document.body,
-  // 浮窗
-  popup: null,
-  // x轴位移量
-  offsetX: 2,
-  // y轴位移量
-  offsetY: 18,
-  // 选择结束
-  onEnd: () => {},
-}
-const EVENT_NAMES = {
-  mobile: {
-    START: 'touchstart',
-    END: 'touchend',
-  },
-  pc: {
-    START: 'mousedown',
-    END: 'mouseup',
-  },
-}
-// 关闭按钮
-const closeIcon =
-  '<?xml version="1.0" standalone="no"?><!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd"><svg t="1636784066087" class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="4964" xmlns:xlink="http://www.w3.org/1999/xlink" width="200" height="200"><defs><style type="text/css"></style></defs><path d="M512 0a512 512 0 0 0-512 512 512 512 0 0 0 512 512 512 512 0 0 0 512-512 512 512 0 0 0-512-512z" fill="#efd0c9" p-id="4965"></path><path d="M717.165714 306.176a35.986286 35.986286 0 0 0-50.834285 0.146286L512 461.019429 357.668571 306.322286a35.986286 35.986286 0 0 0-50.980571 50.761143L461.165714 512 306.688 666.916571a35.986286 35.986286 0 0 0 50.980571 50.761143L512 562.980571l154.331429 154.843429a35.693714 35.693714 0 0 0 50.834285 0.073143 35.986286 35.986286 0 0 0 0.146286-50.907429L562.834286 512l154.331428-154.916571a35.913143 35.913143 0 0 0 0-50.907429z" fill="#AE060F" p-id="4966"></path></svg>'
+import { getPlatform, isMobile } from './utils'
 
 class SelectionHanDian {
   constructor(options = {}) {
     this.options = {
-      ...defaultOptions,
+      ...DEFAULT_OPTIONS,
       ...options,
     }
     this.stopPropagationNodes = []
     this._init()
   }
 
-  utils = {
-    hasMobileUA() {
-      var nav = window.navigator
-      var ua = nav.userAgent
-      var pa =
-        /iPad|iPhone|Android|Opera Mini|BlackBerry|webOS|UCWEB|Blazer|PSP|IEMobile|Symbian/g
-      return pa.test(ua)
-    },
-    isMobile() {
-      return window.screen.width < 767 && this.hasMobileUA()
-    },
-    getRelativePos: (event) => {
-      if (this.platform === 'mobile') {
-        return {
-          x: event.changedTouches[0].clientX || 0,
-          y: event.changedTouches[0].clientY || 0,
-        }
-      }
+  getRelativePos = (event) => {
+    if ([MOBILE, TABLET].includes(this.platform)) {
       return {
-        x: event.clientX || 0,
-        y: event.clientY || 0,
+        x: event.changedTouches[0].clientX || 0,
+        y: event.changedTouches[0].clientY || 0,
       }
-    },
+    }
+    return {
+      x: event.clientX || 0,
+      y: event.clientY || 0,
+    }
   }
 
   //  初始化
   _init() {
-    this.isMobile = this.utils.isMobile()
-    this.platform = this.isMobile ? 'mobile' : 'pc'
+    this.isMobile = isMobile()
+    this.platform = getPlatform()
 
     this.isMobile && this._createMask()
     this._createPopup()
@@ -115,10 +79,6 @@ class SelectionHanDian {
     })
 
     bingTouch(this.bar, this.popup, this.hidePopup)
-
-    // this.bar?.addEventListener(EVENT_NAMES[this.platform].END, () => {
-    //   this.hidePopup()
-    // })
   }
 
   // 汉典加速
@@ -149,7 +109,7 @@ class SelectionHanDian {
       document.documentElement.scrollTop ||
       document.body.scrollTop ||
       0
-    const pos = this.utils.getRelativePos(event)
+    const pos = this.getRelativePos(event)
     const left = pos.x
     const top = pos.y + sh
 
@@ -204,7 +164,7 @@ class SelectionHanDian {
         this.popup.style.bottom = `0px`
         this.popup.style.transform = 'translateY(100%)'
       } else {
-        this.popup.style.top = `${this.isMobile ? -window.innerHeight : top}px`
+        this.popup.style.top = `${top}px`
       }
       this.showPopup()
 
@@ -233,7 +193,7 @@ class SelectionHanDian {
     div.style.top = 0
     div.style.width = '100%'
     div.style.height = '100%'
-    div.style.zIndex = -1
+    div.style.zIndex = 999
     div.style.backgroundColor = 'rgba(0,0,0,0.5)'
     div.style['-webkit-tap-highlight-color'] = 'transparent'
     div.style.opacity = 0
@@ -265,7 +225,7 @@ class SelectionHanDian {
     // 创建关闭按钮
     const closeBtn = document.createElement('div')
     closeBtn.setAttribute('class', 'ly-popup-close')
-    closeBtn.innerHTML = closeIcon
+    closeBtn.innerHTML = CLOSE_ICON
 
     const loading = document.createElement('p')
     loading.style.position = 'absolute'
@@ -467,6 +427,7 @@ class SelectionHanDian {
         this.popup.style.transform = `translateY(100%)`
         this.popTimer = setTimeout(() => {
           this.popup.style.display = 'none'
+          this.mask.style.zIndex = -1
         }, 350)
       } else {
         this.popup.style.display = 'none'
@@ -476,7 +437,6 @@ class SelectionHanDian {
     if (this.isMobile) {
       this.mask.style.opacity = 0
       this.mask.style.visibility = 'hidden'
-      this.mask.style.zIndex = -1
     }
   }
 
