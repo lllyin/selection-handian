@@ -7,7 +7,7 @@ import {
 } from './constants'
 import bingTouch from './bingTouch'
 import styles from './styles'
-import { getPlatform, isMobile } from './utils'
+import { getPlatform, isMobile, tapStyles } from './utils'
 
 class SelectionHanDian {
   constructor(options = {}) {
@@ -89,13 +89,16 @@ class SelectionHanDian {
 
       iframe.width = 0
       iframe.height = 0
-      iframe.style.width = '0px'
-      iframe.style.height = '0px'
-      iframe.style.overflow = 'hidden'
-      iframe.style.opacity = '0'
       iframe.frameBorder = '0'
       iframe.sandbox = 'allow-same-origin allow-forms'
       iframe.seamless = 'seamless'
+
+      tapStyles(iframe, {
+        width: '0px',
+        height: '0px',
+        overflow: 'hidden',
+        opacity: 0,
+      })
 
       document.body.appendChild(iframe)
     }, 1000)
@@ -117,25 +120,28 @@ class SelectionHanDian {
       button = document.createElement('div')
       button.setAttribute('class', 'ly-popup-button')
 
-      button.style.position = 'absolute'
-      button.style.display = 'block'
-      button.style.left = 0
-      button.style.top = 0
-      button.style.width = '32px'
-      button.style.minHeight = '32px'
-      button.style.borderRadius = '3px'
-      button.style.backgroundColor = '#f5f5f5'
-      button.style.fontFamily = 'STSong, STFangSong'
-      button.style.fontWeight = 500
-      button.style.color = '#9d6a51'
-      button.style.cursor = 'pointer'
-      button.style.zIndex = '1200'
-      button.style.textAlign = 'center'
-      button.style.lineHeight = '32px'
-      button.style.fontSize = '18px'
-      button.style.userSelect = 'none'
       button.innerText = '典'
       button.title = '查汉典'
+
+      tapStyles(button, {
+        position: 'absolute',
+        left: 0,
+        top: 0,
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        width: '32px',
+        height: '32px',
+        borderRadius: '3px',
+        backgroundColor: '#f5f5f5',
+        fontFamily: 'STSong, STFangSong',
+        fontWeight: 500,
+        color: '#9d6a51',
+        cursor: 'pointer',
+        zIndex: '1200',
+        fontSize: '18px',
+        userSelect: 'none',
+      })
 
       button.addEventListener(EVENT_NAMES[this.platform].START, (e) =>
         e.stopPropagation(),
@@ -187,17 +193,19 @@ class SelectionHanDian {
     const div = document.createElement('div')
     div.setAttribute('class', `ly-popup-mask ${this.platform}`)
 
-    div.style.position = 'fixed'
-    div.style.visibility = 'hidden'
-    div.style.left = 0
-    div.style.top = 0
-    div.style.width = '100%'
-    div.style.height = '100%'
-    div.style.zIndex = 999
-    div.style.backgroundColor = 'rgba(0,0,0,0.5)'
-    div.style['-webkit-tap-highlight-color'] = 'transparent'
-    div.style.opacity = 0
-    div.style.transition = 'opacity 300ms cubic-bezier(0.4, 0, 0.2, 1) 0ms'
+    tapStyles(div, {
+      position: 'fixed',
+      visibility: 'hidden',
+      left: 0,
+      top: 0,
+      width: '100%',
+      height: '100%',
+      zIndex: -1,
+      backgroundColor: 'rgba(0,0,0,0.5)',
+      '-webkit-tap-highlight-color': 'transparent',
+      opacity: 0,
+      transition: 'opacity 300ms cubic-bezier(0.4, 0, 0.2, 1) 0ms',
+    })
 
     this.options.container.appendChild(div)
     this.mask = div
@@ -208,16 +216,18 @@ class SelectionHanDian {
     const div = document.createElement('div')
     div.setAttribute('class', `ly-popup-cotainer ${this.platform}`)
 
-    div.style.position = this.isMobile ? 'fixed' : 'absolute'
-    div.style.display = 'none'
-    div.style.zIndex = '1201'
-    div.style.left = 0
-    div.style.top = this.isMobile ? '' : '0'
-    div.style.minWidth = this.isMobile ? '100vw' : '375px'
-    div.style.minHeight = this.isMobile ? '60vh' : '375px'
-    div.style.backgroundColor = '#fff'
-    div.style.boxShadow = 'rgb(0 0 0 / 8%) 1px 2px 13px 0px'
-    div.style.overflow = this.isMobile ? 'auto' : 'hidden'
+    tapStyles(div, {
+      position: this.isMobile ? 'fixed' : 'absolute',
+      display: 'none',
+      zIndex: '1201',
+      left: 0,
+      top: this.isMobile ? '' : '0',
+      minWidth: this.isMobile ? '100vw' : '375px',
+      minHeight: this.isMobile ? '60vh' : '375px',
+      backgroundColor: '#fff',
+      boxShadow: 'rgb(0 0 0 / 8%) 1px 2px 13px 0px',
+      overflow: 'hidden',
+    })
 
     // 创建bar
     const bar = document.createElement('div')
@@ -228,25 +238,28 @@ class SelectionHanDian {
     closeBtn.innerHTML = CLOSE_ICON
 
     const loading = document.createElement('p')
-    loading.style.position = 'absolute'
-    loading.style.left = '0'
-    loading.style.top = '0'
-    loading.style.display = 'flex'
-    loading.style.justifyContent = 'center'
-    loading.style.alignItems = 'center'
-    loading.style.width = '100%'
-    loading.style.height = this.isMobile ? '100%' : '20px'
-    loading.style.zIndex = '99'
-    loading.style.textAlign = 'center'
-    loading.style.fontSize = '12px'
-    loading.style.backgroundColor = 'rgba(248, 249, 251, 0.8)'
-    loading.style.color = '#555'
-    loading.style.margin = '0'
-    loading.style.overflow = 'hidden'
-    loading.setAttribute('class', 'handian-loading hide')
-
     loading.innerHTML = '加載結果中，請稍候……'
     loading.id = 'handian-loading'
+    loading.setAttribute('class', 'handian-loading hide')
+
+    tapStyles(loading, {
+      position: 'absolute',
+      left: 0,
+      top: 0,
+      display: 'flex',
+      justifyContent: 'center',
+      alignItems: 'center',
+      width: '100%',
+      height: this.isMobile ? '100%' : '20px',
+      zIndex: '99',
+      textAlign: 'center',
+      fontSize: '12px',
+      backgroundColor: 'rgba(248, 249, 251, 0.8)',
+      color: '#555',
+      margin: '0',
+      overflow: 'hidden',
+    })
+
     div.appendChild(loading)
     this.isMobile && div.appendChild(bar)
     div.appendChild(closeBtn)
@@ -408,7 +421,11 @@ class SelectionHanDian {
   // 展示popup
   showPopup = () => {
     if (this.popup) {
-      this.options.container.style.overflow = 'hidden'
+      tapStyles([document.documentElement, this.options.container], {
+        overflow: 'hidden',
+        height: this.isMobile ? '100%' : '',
+        position: this.isMobile ? 'relative' : '',
+      })
       this.popup.style.display = 'block'
       if (this.isMobile) {
         this.mask.style.opacity = 1
@@ -422,7 +439,11 @@ class SelectionHanDian {
   // 隐藏popup
   hidePopup = () => {
     if (this.popup) {
-      this.options.container.style.overflow = 'auto'
+      tapStyles([document.documentElement, this.options.container], {
+        overflow: '',
+        height: '',
+        position: '',
+      })
       if (this.isMobile) {
         this.popup.style.transform = `translateY(100%)`
         this.popTimer = setTimeout(() => {

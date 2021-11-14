@@ -24,3 +24,16 @@ export function getPlatform() {
 
   return platform
 }
+
+export function tapStyles(el, styles) {
+  if (!el || !styles) return
+  const els = Array.isArray(el) ? el : [el]
+
+  els.forEach((node) => {
+    Object.keys(styles).forEach((key) => {
+      node.style[key] = styles[key]
+    })
+  })
+
+  return el
+}
