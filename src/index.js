@@ -429,8 +429,6 @@ class SelectionHanDian {
     if (this.popup) {
       tapStyles([document.documentElement, this.options.container], {
         overflow: 'hidden',
-        height: this.isMobile ? '100vh' : '',
-        position: this.isMobile ? 'relative' : '',
       })
       this.popup.style.display = 'block'
       if (this.isMobile) {
@@ -447,8 +445,6 @@ class SelectionHanDian {
     if (this.popup) {
       tapStyles([document.documentElement, this.options.container], {
         overflow: '',
-        height: '',
-        position: '',
       })
       if (this.isMobile) {
         this.popup.style.transform = `translateY(100%)`
