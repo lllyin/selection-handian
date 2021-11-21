@@ -1,0 +1,50 @@
+{
+  "root": true,
+  "parser": "@babel/eslint-parser",
+  "extends": "airbnb-base",
+  "plugins": ["prettier"],
+  "parserOptions": {
+    "ecmaVersion": 2018,
+    "sourceType": "module"
+  },
+  "globals": {
+    "window": true,
+    "document": true
+  },
+  "rules": {
+    "prettier/prettier": ["warn"],
+    // disable requiring trailing commas because it might be nice to revert to
+    // being JSON at some point, and I don't want to make big changes now.
+    "comma-dangle": 0,
+    "no-unused-vars": [2, { "vars": "all", "args": "after-used" }],
+    "max-len": 0,
+    "semi": ["error", "never"],
+    "no-console": [
+      "warn",
+      {
+        "allow": ["warn", "error"]
+      }
+    ],
+    "template-curly-spacing": "off",
+    "indent": [
+      "off",
+      2,
+      {
+        "SwitchCase": 1,
+        "ignoredNodes": ["TemplateLiteral"]
+      }
+    ],
+    "no-void": ["off", { "allowAsStatement": true }],
+    "operator-linebreak": "off",
+    "no-param-reassign": ["off", { "props": true }],
+    "no-unused-expressions": ["error", {
+      "allowShortCircuit": true
+    }],
+    "object-curly-newline": "off",
+    "no-control-regex": "off",
+    "arrow-body-style": "off",
+    "no-new": "off",
+    "class-methods-use-this": "off",
+    "consistent-return": "warn"
+  }
+}

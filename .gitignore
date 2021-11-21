@@ -11,6 +11,7 @@
 .idea/
 .happypack
 .DS_Store
+.eslintcache
 webpack_cache/*
 
 npm-debug.log*

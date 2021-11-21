@@ -1,3 +1,22 @@
+export const DEFAULT_OPTIONS = {
+  // 汉典最大加载时间
+  MAX_TIME_OUT: 5000,
+  // 滚动容器，默认为 document.documentElement || document.body
+  scroller: void 0,
+  // 浮窗挂载节点
+  container: document.body,
+  // 监听节点
+  el: document.body,
+  // 浮窗
+  popup: null,
+  // x轴位移量
+  offsetX: 2,
+  // y轴位移量
+  offsetY: 15,
+  // 选择结束
+  onEnd: () => {},
+}
+
 // 手机
 export const MOBILE = 'mobile'
 // 平板
@@ -18,25 +37,6 @@ export const EVENT_NAMES = {
     START: 'mousedown',
     END: 'mouseup',
   },
-}
-
-export const DEFAULT_OPTIONS = {
-  // 汉典最大加载时间
-  MAX_TIME_OUT: 5000,
-  // 滚动容器，默认为 document.documentElement || document.body
-  scroller: void 0,
-  // 浮窗挂载节点
-  container: document.body,
-  // 监听节点
-  el: document.body,
-  // 浮窗
-  popup: null,
-  // x轴位移量
-  offsetX: 2,
-  // y轴位移量
-  offsetY: 18,
-  // 选择结束
-  onEnd: () => {},
 }
 
 // 关闭按钮

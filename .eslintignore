@@ -4,7 +4,6 @@ tests/
 demo/
 public/
 dist/
-quill-resize-module/
 node_modules/
 
 # node 覆盖率文件

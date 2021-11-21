@@ -4,7 +4,7 @@ body * {
 }
 .ly-popup-button {
   will-change: transform, opacity;
-  transition: transform, opacity 350ms cubic-bezier(0.4, 0, 0.2, 1) 0ms;
+  transition: all 350ms cubic-bezier(0.4, 0, 0.2, 1);
 }
 .ly-popup-cotainer.pc {
   border-radius: 3px;
@@ -51,7 +51,7 @@ body * {
   will-change: transform, opacity;
 }
 .ly-popup-cotainer .handian-loading.hide {
-    transition: opacity,transform  0.25s cubic-bezier(0, 0, 0.2, 1) 0s;
+    transition: opacity,transform  0.25s cubic-bezier(0, 0, 0.2, 1);
 }
 .ly-popup-cotainer.mobile .handian-loading.hide {
     opacity: 0;

@@ -1,7 +1,7 @@
 export function hasMobileUA() {
-  var nav = window.navigator
-  var ua = nav.userAgent
-  var pa =
+  const nav = window.navigator
+  const ua = nav.userAgent
+  const pa =
     /iPad|iPhone|Android|Opera Mini|BlackBerry|webOS|UCWEB|Blazer|PSP|IEMobile|Symbian/g
   return pa.test(ua)
 }
@@ -26,7 +26,7 @@ export function getPlatform() {
 }
 
 export function tapStyles(el, styles) {
-  if (!el || !styles) return
+  if (!el || !styles) return void 0
   const els = Array.isArray(el) ? el : [el]
 
   els.forEach((node) => {
@@ -36,4 +36,15 @@ export function tapStyles(el, styles) {
   })
 
   return el
+}
+
+// 修剪文字
+export function trim(text) {
+  const text2 = String(text)
+    .trim()
+    .replace(/([。，！～【】()（）])|(\d)|(\s*)/gi, '')
+    .replace(/[a-zA-Z]/g, '')
+  const cnReg = /[^\u0000-\u00FF]/
+
+  return cnReg.test(text2) ? text2 : ''
 }

@@ -7,7 +7,7 @@ import {
 } from './constants'
 import bingTouch from './bingTouch'
 import styles from './styles'
-import { getPlatform, isMobile, tapStyles } from './utils'
+import { trim, getPlatform, isMobile, tapStyles } from './utils'
 
 class SelectionHanDian {
   constructor(options = {}) {
@@ -16,108 +16,84 @@ class SelectionHanDian {
       ...options,
     }
     this.stopPropagationNodes = []
-    this._init()
-  }
-
-  getRelativePos = (event) => {
-    if ([MOBILE, TABLET].includes(this.platform)) {
-      return {
-        x: event.changedTouches[0].clientX || 0,
-        y: event.changedTouches[0].clientY || 0,
-      }
-    }
-    return {
-      x: event.clientX || 0,
-      y: event.clientY || 0,
-    }
+    this.state = {}
+    this.nodes = {}
+    this.init()
   }
 
   //  初始化
-  _init() {
-    this.isMobile = isMobile()
-    this.platform = getPlatform()
+  init() {
+    this.state.isMobile = isMobile()
+    this.state.platform = getPlatform()
 
-    this.isMobile && this._createMask()
-    this._createPopup()
+    this.state.isMobile && this.createMask()
+    this.createPopup()
     this.injectStyles()
-    this._bindEvents()
-    this._prefetchHanDian()
+    this.bindEvents()
+    this.prefetchHanDian()
   }
 
   // 绑定pc端事件
-  _bindEvents() {
-    const { container, el, onEnd } = this.options
+  bindEvents() {
+    const { el } = this.options
 
-    window.removeEventListener(EVENT_NAMES[this.platform].START, this.hideAll)
-    el.addEventListener('contextmenu', (e) => e.preventDefault())
-    el.addEventListener(EVENT_NAMES[this.platform].END, (e) => {
+    el.addEventListener('contextmenu', () => {
+      this.togglePopup(false)
+    })
+    el.addEventListener(EVENT_NAMES[this.state.platform].END, (ev) => {
+      if (ev.target === this.nodes.button) {
+        return
+      }
       const selection = window.getSelection()
 
       if (selection.type === 'Range') {
         const text = selection.toString()
-        const trimText = this.trimText(text)
+        const trimText = trim(text)
 
         if (!trimText) return
 
-        this._createButton(event, trimText)
+        this.createButton(ev, trimText, selection)
 
-        onEnd(e, trimText, this)
+        this.togglePopup(false)
+        this.toggleButton(this.state.trimText === trimText ? void 0 : true)
 
-        window.addEventListener(EVENT_NAMES[this.platform].START, this.hideAll)
+        // 后置
+        this.state.trimText = trimText
+      } else {
+        this.hideAll()
       }
     })
+
     this.stopPropagationNodes.forEach((node) => {
-      node.addEventListener(EVENT_NAMES[this.platform].START, (e) =>
-        e.stopPropagation(),
-      )
-      node.addEventListener(EVENT_NAMES[this.platform].END, (e) =>
-        e.stopPropagation(),
-      )
-    })
-    this.closeBtn?.addEventListener(EVENT_NAMES[this.platform].END, () => {
-      this.hidePopup()
-    })
-
-    bingTouch(this.bar, this.popup, this.hidePopup)
-  }
-
-  // 汉典加速
-  _prefetchHanDian() {
-    setTimeout(() => {
-      const iframe = document.createElement('iframe')
-      iframe.src = '//www.zdic.net'
-
-      iframe.width = 0
-      iframe.height = 0
-      iframe.frameBorder = '0'
-      iframe.sandbox = 'allow-same-origin allow-forms'
-      iframe.seamless = 'seamless'
-
-      tapStyles(iframe, {
-        width: '0px',
-        height: '0px',
-        overflow: 'hidden',
-        opacity: 0,
+      node.addEventListener(EVENT_NAMES[this.state.platform].END, (ev) => {
+        ev.stopPropagation()
       })
+    })
+    this.nodes.closeBtn.addEventListener(
+      EVENT_NAMES[this.state.platform].END,
+      () => {
+        this.hideAll()
+      },
+    )
 
-      document.body.appendChild(iframe)
-    }, 1000)
+    bingTouch(this.nodes.bar, this.nodes.popup, this.hideAll)
   }
 
   // 创建按钮
-  _createButton(event, trimText) {
-    let button = document.querySelector('.ly-popup-button')
+  createButton(event, trimText, selection) {
+    const { onEnd } = this.options
     const sh =
       window.pageYOffset ||
       document.documentElement.scrollTop ||
       document.body.scrollTop ||
       0
+    const rect = selection.getRangeAt(0).getBoundingClientRect()
     const pos = this.getRelativePos(event)
-    const left = pos.x
-    const top = pos.y + sh
+    const left = Math.min(rect.left + rect.width, pos.x)
+    const top = rect.top + rect.height + sh
 
-    if (!button) {
-      button = document.createElement('div')
+    if (!this.nodes.button) {
+      const button = document.createElement('div')
       button.setAttribute('class', 'ly-popup-button')
 
       button.innerText = '典'
@@ -143,55 +119,54 @@ class SelectionHanDian {
         userSelect: 'none',
       })
 
-      button.addEventListener(EVENT_NAMES[this.platform].START, (e) =>
-        e.stopPropagation(),
-      )
-      button.addEventListener(EVENT_NAMES[this.platform].END, (e) =>
-        e.stopPropagation(),
-      )
-
       document.body.appendChild(button)
-      this.button = button
+      this.nodes.button = button
     }
 
-    this.showButton()
+    tapStyles(this.nodes.button, {
+      transform: `translate(${left + this.options.offsetX}px, ${
+        top + this.options.offsetY / 2
+      }px)`,
+    })
 
-    button.onclick = (e) => {
-      e.stopPropagation()
-      this.hideButton()
+    this.nodes.button[`on${EVENT_NAMES[this.state.platform].END}`] = () => {
+      this.toggleButton(false)
       // 汉典
-      const zdic = this._createHanDian(trimText)
-      this.popup.appendChild(zdic)
+      const zdic = this.createHanDian(trimText)
+      this.nodes.popup.appendChild(zdic)
+
+      // call onEnd API
+      onEnd(event, trimText, this)
 
       // 定位容器位置
-      this.popup.style.left = `${this.isMobile ? 0 : left}px`
-      if (this.isMobile) {
-        this.popup.style.left = '0px'
-        this.popup.style.bottom = `0px`
-        this.popup.style.transform = 'translateY(100%)'
+      if (this.state.isMobile) {
+        tapStyles(this.nodes.popup, {
+          left: '0px',
+          bottom: '0px',
+          transform: 'translateY(100%)',
+        })
       } else {
-        this.popup.style.top = `${top}px`
+        tapStyles(this.nodes.popup, {
+          left: `${left}px`,
+          top: `${top + this.options.offsetY * 2}px`,
+        })
       }
-      this.showPopup()
+      this.togglePopup(true)
 
       const newPosition = this.calcPosition(
-        { x: left + this.options.offsetX, y: top + this.options.offsetY },
-        this.popup,
+        { x: left, y: top + this.options.offsetY },
+        this.nodes.popup,
       )
-      this.callPosition(this.popup, newPosition)
+      this.callPosition(this.nodes.popup, newPosition)
     }
 
-    button.style.transform = `translate(${left}px, ${
-      top + this.options.offsetY
-    }px)`
-
-    return button
+    return this.nodes.button
   }
 
   // 创建mask
-  _createMask() {
+  createMask() {
     const div = document.createElement('div')
-    div.setAttribute('class', `ly-popup-mask ${this.platform}`)
+    div.setAttribute('class', `ly-popup-mask ${this.state.platform}`)
 
     tapStyles(div, {
       position: 'fixed',
@@ -208,22 +183,22 @@ class SelectionHanDian {
     })
 
     this.options.container.appendChild(div)
-    this.mask = div
+    this.nodes.mask = div
   }
 
   // 创建浮窗
-  _createPopup() {
+  createPopup() {
     const div = document.createElement('div')
-    div.setAttribute('class', `ly-popup-cotainer ${this.platform}`)
+    div.setAttribute('class', `ly-popup-cotainer ${this.state.platform}`)
 
     tapStyles(div, {
-      position: this.isMobile ? 'fixed' : 'absolute',
+      position: this.state.isMobile ? 'fixed' : 'absolute',
       display: 'none',
       zIndex: '1201',
       left: 0,
-      top: this.isMobile ? '' : '0',
-      minWidth: this.isMobile ? '100vw' : '375px',
-      minHeight: this.isMobile ? '60vh' : '375px',
+      top: this.state.isMobile ? '' : '0',
+      minWidth: this.state.isMobile ? '100vw' : '375px',
+      minHeight: this.state.isMobile ? '60vh' : '375px',
       backgroundColor: '#fff',
       boxShadow: 'rgb(0 0 0 / 8%) 1px 2px 13px 0px',
       overflow: 'hidden',
@@ -250,7 +225,7 @@ class SelectionHanDian {
       justifyContent: 'center',
       alignItems: 'center',
       width: '100%',
-      height: this.isMobile ? '100%' : '20px',
+      height: this.state.isMobile ? '100%' : '20px',
       zIndex: '99',
       textAlign: 'center',
       fontSize: '12px',
@@ -261,25 +236,25 @@ class SelectionHanDian {
     })
 
     div.appendChild(loading)
-    this.isMobile && div.appendChild(bar)
+    this.state.isMobile && div.appendChild(bar)
     div.appendChild(closeBtn)
 
     document.body.appendChild(div)
-    this.popup = div
-    this.loading = loading
-    this.bar = bar
-    this.closeBtn = closeBtn
+    this.nodes.popup = div
+    this.nodes.loading = loading
+    this.nodes.bar = bar
+    this.nodes.closeBtn = closeBtn
 
     this.stopPropagationNodes.push(bar, closeBtn)
     return div
   }
 
-  _createHanDian(word = '') {
+  createHanDian(word = '') {
     const previousContent = document.getElementById('handian_content')
     if (previousContent) {
-      this.popup.removeChild(previousContent)
+      this.nodes.popup.removeChild(previousContent)
     }
-    clearTimeout(this._timer)
+    clearTimeout(this.hdTimer)
 
     // add new content
     const content = document.createElement('iframe')
@@ -289,30 +264,30 @@ class SelectionHanDian {
     content.seamless = 'seamless'
     content.id = 'handian_content'
     // content.style['display'] = 'none';
-    content.width = this.isMobile ? window.innerWidth : '375'
-    content.height = this.isMobile ? window.innerHeight * 0.6 : '400'
+    content.width = this.state.isMobile ? window.innerWidth : '375'
+    content.height = this.state.isMobile ? window.innerHeight * 0.6 : '400'
 
-    this.isMobile &&
+    this.state.isMobile &&
       tapStyles(content, {
         width: '100%',
         height: '60vh',
       })
 
     console.log('加载汉典', Date.now())
-    this.showLoading()
+    this.toggleLoading(true)
     content.addEventListener('load', () => {
       console.log('汉典加载好了', Date.now())
-      this.hideLoading()
+      this.toggleLoading(false)
     })
     content.addEventListener('error', () => {
-      console.log('加载汉典报错', Date.now())
-      this.hideLoading()
+      console.error('加载汉典报错', Date.now())
+      this.toggleLoading(false)
     })
     if (this.options.MAX_TIME_OUT) {
-      this._timer = setTimeout(() => {
-        if (this.getLoadingVisible()) {
+      this.hdTimer = setTimeout(() => {
+        if (this.state.loadingVisible) {
           console.warn(`汉典加载超过${this.options.MAX_TIME_OUT}ms`)
-          this.hideLoading()
+          this.toggleLoading(false)
         }
       }, this.options.MAX_TIME_OUT)
     }
@@ -320,15 +295,27 @@ class SelectionHanDian {
     return content
   }
 
-  // 修剪文字
-  trimText = (text) => {
-    const text2 = String(text)
-      .trim()
-      .replace(/([。，！～【】\(\)（）])|(\d)|(\s*)/gi, '')
-      .replace(/[a-zA-Z]/g, '')
-    const cnReg = /[^\u0000-\u00FF]/
+  // 汉典加速
+  prefetchHanDian() {
+    setTimeout(() => {
+      const iframe = document.createElement('iframe')
+      iframe.src = '//www.zdic.net'
 
-    return cnReg.test(text2) ? text2 : ''
+      iframe.width = 0
+      iframe.height = 0
+      iframe.frameBorder = '0'
+      iframe.sandbox = 'allow-same-origin allow-forms'
+      iframe.seamless = 'seamless'
+
+      tapStyles(iframe, {
+        width: '0px',
+        height: '0px',
+        overflow: 'hidden',
+        opacity: 0,
+      })
+
+      document.body.appendChild(iframe)
+    }, 1000)
   }
 
   // 插入样式
@@ -342,9 +329,22 @@ class SelectionHanDian {
     return style
   }
 
+  getRelativePos = (event) => {
+    if ([MOBILE, TABLET].includes(this.state.platform)) {
+      return {
+        x: event.changedTouches[0].clientX || 0,
+        y: event.changedTouches[0].clientY || 0,
+      }
+    }
+    return {
+      x: event.clientX || 0,
+      y: event.clientY || 0,
+    }
+  }
+
   // 计算元素位置
   calcPosition(position, el) {
-    if (!position || !el) return
+    if (!position || !el) return { left: 0, top: 0 }
     const { x, y } = position
     const winWidth = Math.max(window.innerWidth, document.body.scrollWidth)
     const winHeight = Math.max(window.innerHeight, document.body.scrollHeight)
@@ -362,8 +362,8 @@ class SelectionHanDian {
 
     el.style.transition = 'all 0.35s cubic-bezier(0, 0, 0.2, 1) 0s'
 
-    if (this.isMobile) {
-      el.style.transform = `translateY(0px)`
+    if (this.state.isMobile) {
+      el.style.transform = 'translateY(0px)'
       return
     }
 
@@ -391,109 +391,86 @@ class SelectionHanDian {
     }
   }
 
-  // 获取popup node
-  getPopup = () => {
-    return this.popup
-  }
+  // 开关查典button
+  toggleButton = (visible) => {
+    if (!this.nodes.button) return
+    this.state.buttionVisible =
+      visible === void 0 ? !this.state.buttionVisible : visible
 
-  // popup是否可见
-  getPopupVisible = () => {
-    const style = window.getComputedStyle(this.popup)
-    return style.display !== 'none'
-  }
-
-  // loading是否可见
-  getLoadingVisible = () => {
-    const loading = document.querySelector('#handian-loading')
-    return loading && loading.clientHeight > 0
-  }
-
-  // 展示Button
-  showButton = () => {
-    if (this.button) {
-      this.button.style.opacity = 1
-      this.button.style.pointerEvents = 'auto'
+    if (this.state.buttionVisible) {
+      this.nodes.button.style.opacity = 1
+      this.nodes.button.style.pointerEvents = 'auto'
+    } else {
+      this.nodes.button.style.opacity = 0
+      this.nodes.button.style.pointerEvents = 'none'
     }
   }
 
-  // 隐藏button
-  hideButton = () => {
-    if (this.button) {
-      this.button.style.opacity = 0
-      this.button.style.pointerEvents = 'none'
-    }
-  }
+  // 开关查典popup
+  togglePopup = (visible) => {
+    if (!this.nodes.popup) return
+    this.state.popupVisible =
+      visible === void 0 ? !this.state.popupVisible : visible
 
-  // 展示popup
-  showPopup = () => {
-    if (this.popup) {
+    if (this.state.popupVisible) {
       tapStyles([document.documentElement, this.options.container], {
         overflow: 'hidden',
       })
-      this.popup.style.display = 'block'
-      if (this.isMobile) {
-        this.mask.style.opacity = 1
-        this.mask.style.visibility = 'visible'
-        this.mask.style.zIndex = 1200
+      this.nodes.popup.style.display = 'block'
+      if (this.state.isMobile) {
+        this.nodes.mask.style.opacity = 1
+        this.nodes.mask.style.visibility = 'visible'
+        this.nodes.mask.style.zIndex = 1200
       }
-      clearTimeout(this.popTimer)
-    }
-  }
-
-  // 隐藏popup
-  hidePopup = () => {
-    if (this.popup) {
+      clearTimeout(this.state.popupTimer)
+    } else {
       tapStyles([document.documentElement, this.options.container], {
         overflow: '',
       })
-      if (this.isMobile) {
-        this.popup.style.transform = `translateY(100%)`
-        this.popTimer = setTimeout(() => {
-          this.popup.style.display = 'none'
-          this.mask.style.zIndex = -1
+      if (this.state.isMobile) {
+        this.nodes.popup.style.transform = 'translateY(100%)'
+        this.nodes.mask.style.opacity = 0
+        this.state.popupTimer = setTimeout(() => {
+          this.nodes.popup.style.display = 'none'
+          this.nodes.mask.style.zIndex = -1
+          this.nodes.mask.style.visibility = 'hidden'
         }, 350)
       } else {
-        this.popup.style.display = 'none'
+        this.nodes.popup.style.display = 'none'
       }
-    }
-    // mask
-    if (this.isMobile) {
-      this.mask.style.opacity = 0
-      this.mask.style.visibility = 'hidden'
     }
   }
 
-  // 展示loading
-  showLoading() {
+  // 开关loading
+  toggleLoading = (visible) => {
+    if (!this.nodes.loading) return
     const loading = document.getElementById('handian-loading')
-    if (loading) {
+    this.state.loadingVisible =
+      visible === void 0 ? !this.state.loadingVisible : visible
+
+    if (this.state.loadingVisible) {
       loading.classList.remove('hide')
-    }
-  }
-  // 隐藏loading
-  hideLoading() {
-    const loading = document.getElementById('handian-loading')
-    if (loading) {
+    } else {
       loading.classList.add('handian-loading', 'hide')
     }
   }
 
+  // 隐藏所有
   hideAll = () => {
-    this.hideButton()
-    this.hidePopup()
+    this.toggleButton(false)
+    this.togglePopup(false)
+    this.toggleLoading(false)
   }
 }
 
 new SelectionHanDian({
-  onEnd: function (event, text, instance) {
+  onEnd: function onEnd(event, text, instance) {
     Array.isArray(window.dataLayer) &&
-      window.dataLayer.push(
-        Object.assign({
-          event: 'dianClick',
-          selection_text: text,
-          platform: instance.platform,
-        }),
-      )
+      window.dataLayer.push({
+        event: 'dianClick',
+        selection_text: text,
+        platform: instance.state.platform,
+      })
   },
 })
 
